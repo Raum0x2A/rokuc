@@ -1,0 +1,342 @@
+#!/bin/bash
+
+if ! hash curl 2>/dev/null; then
+    echo "curl is not installed"
+    exit
+fi
+
+script=`basename "$0"`
+
+function helpme()
+{
+	echo "Send simple remote commands to Roku devices using curl to interact with Rokus ECP (External Control Protocal) server on port 8060."
+	echo "Usage: ${script} -a [ADDRESS] [ [-h] [-v] [-c [ARGS]] [-l [ARGS]] ]"	
+	echo -e '''   -a | --address\tIP address of roku device ** REQUIRED **
+   -c | --command\tSend remote commands to device
+   -l | --launch \tLaunch Channel/Application on device
+   -v | --verbose \tEnable verbose mode
+   -h | --help   \tDisplay this message
+
+Args for [-c|--command] flag
+   play | pause | | | p          \t Pause and Play
+   home | #                      \t Go to home screen
+   select | ok | .               \t Select
+   vol+ | v+ | vup | +           \t Turn volume up
+   vol- | v- | vdown | -         \t Turn volume down
+   mute | m                      \t Mute
+   off | power-off | shutdown | O\t Power off Roku TV
+   on | power-on | startup | I   \t Power on Roku TV
+   back | k                      \t Back
+   u | up | ^                    \t Up arrow
+   d | down | v                  \t Down arrow
+   l | left | <                  \t Left arrow
+   r | right | >                 \t Right arrow
+   s.5                           \t Wait 0.5 seconds
+   s1                            \t Wait 1 second
+   s2                            \t Wait 2 seconds
+   s5                            \t Wait 5 seconds
+
+Args for [-l|--launch] flag
+   plex   \t Launch Plex.tv
+   youtube\t Launch YouTube 
+   netflix\t Launch Netflix
+   hulu   \t Launch Hulu
+   tv     \t Launch Digital TV on Roku TVs
+   hdmi1  \t Launch HDMI1
+   hdmi2  \t Launch HDMI2
+   hdmi3  \t Launch HDMI3
+   hdmi4  \t Launch HDMI4
+   av1    \t Launch AV1
+'''
+echo -e "Examples:\nLaunch Netflix\n\t./${script} -a 192.168.11.142 -l netflix\n"
+echo -e "Pause Roku \n\t./${script} -a 192.168.11.142 -c pause\n"
+echo -e "Go Home & turn down volume\n\t./${script} -a 192.168.11.142 -c \"# v- v-\"\n"
+echo -e "Launch plex, wait 5 seconds, move right, select \n\t./${script} -a 192.168.11.142 -l plex -c \"s5 > .\""
+echo -e "ECP documentation:\n\thttps://developer.roku.com/docs/developer-program/debugging/external-control-api.md"
+
+}
+
+VERBOS=0
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+	key="$1"
+	case $key in
+		-a|--address)
+			ADDRESS="$2"
+			shift
+			shift
+			;;
+		-c|--command)
+			COMMAND="$2"
+			shift
+			shift
+			;;
+		-v|--verbose)
+			VERBOS=1
+        		echo "Verbos enabled."
+			shift
+			;;
+		-l|--launch)
+			LAUNCH="$2"
+			shift
+			shift
+			;;
+		-h|--help)
+			helpme
+			shift
+			;;
+		*)
+			POSITIONAL+=($1)
+			shift
+			;;
+	esac
+done
+set -- "${POSITIONAL[@]}"
+if [[ $VERBOS == 1 ]]; then
+        echo -e "   --address      \t${ADDRESS}"
+        echo -e "   --command      \t${COMMAND}"
+        echo -e "   --launch       \t${LAUNCH}"
+        echo -e "   --verbos       \t${VERBOS}"
+	echo -e "   positional args\t${POSITIONAL[@]}"
+fi
+
+# IP address validation
+function valid_ip()
+{
+    local  ip=$1
+    local  stat=1
+
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        OIFS=$IFS
+        IFS='.'
+        ip=($ip)
+        IFS=$OIFS
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        stat=$?
+    fi
+    return $stat
+}
+
+# kill script if args are invalid
+if [[ -n $1 ]]; then
+    if (( $VERBOS == 1 )); then
+	    echo "Invalid argument(s): ${POSITIONAL[@]}"
+	    exit
+    else
+	    echo "Invalid argument(s)"
+	    exit
+    fi
+fi
+
+# Check if given ip is in a valid format
+if valid_ip $ADDRESS; then
+	if [[ $VERBOS == 1 ]]; then
+		echo "$ADDRESS is valid a valid ip address"
+	fi
+else
+	echo -e "\`$ADDRESS\` is not a valid ip address"
+	exit
+fi
+
+# Launch handler [-l|--launch]
+if [[ $LAUNCH == "plex" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/13535"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/13535"'
+	fi
+	sleep 4
+elif [[ $LAUNCH == "netflix" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/12"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/12"'
+	fi
+	sleep 4
+elif [[ $LAUNCH == "youtube" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/837"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/837"'
+	fi
+	sleep 4
+elif [[ $LAUNCH == "hulu" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/2285"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/2285"'
+	fi
+	sleep 4
+elif [[ $LAUNCH == "hdmi1" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/tvinput.hdmi1"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/tvinput.hdmi1"'
+	fi
+	sleep 4
+elif [[ $LAUNCH == "hdmi2" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/tvinput.hdmi2"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/tvinput.hdmi2"'
+	fi
+	sleep 4
+elif [[ $LAUNCH == "hdmi3" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/tvinput.hdmi3"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/tvinput.hdmi3"'
+	fi
+	sleep 4
+elif [[ $LAUNCH == "hdmi4" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/tvinput.hdmi4"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/tvinput.hdmi4"'
+	fi
+	sleep 4
+elif [[ $LAUNCH == "av1" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/tvinput.av1"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/tvinput.av1"'
+	fi
+	sleep 4
+elif [[ $LAUNCH == "tv" ]]; then
+	curl -d "" "http://${ADDRESS}:8060/launch/tvinput.dtv"
+	if (( $VERBOS == 1 )); then
+		echo 'curl -d "" "http://${ADDRESS}:8060/launch/tvinput.dtv"'
+	fi
+	sleep 4
+fi
+
+# Command handler [-c|--command] args
+com=${COMMAND}
+for key in $com; do
+	case $key in
+		play|pause|"|"|p)
+			curl -d "" "http://${ADDRESS}:8060/keypress/Play"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/Play"'
+			fi
+			sleep .5
+			shift
+			;;
+		home|"#")
+			curl -d "" "http://${ADDRESS}:8060/keypress/Home"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/Home"'
+			fi
+			sleep .5
+			shift
+			;;
+		select|ok|".")
+			curl -d "" "http://${ADDRESS}:8060/keypress/Select"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/Select"'
+			fi
+			sleep .5
+			shift
+			;;
+		vol+|v+|vup|"+")
+			curl -d "" "http://${ADDRESS}:8060/keypress/VolumeUp"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/VolumeUp"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		vol-|v-|vdown|"-")
+			curl -d "" "http://${ADDRESS}:8060/keypress/VolumeDown"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/VolumeDown"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		mute|m)
+			curl -d "" "http://${ADDRESS}:8060/keypress/VolumeMute"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/VolumeMute"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		off|power-off|shutdown|O)
+			curl -d "" "http://${ADDRESS}:8060/keypress/PowerOff"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/PowerOff"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		on|power-on|startup|I)
+			curl -d "" "http://${ADDRESS}:8060/keypress/PowerOn"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/PowerOn"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		back|k)
+			curl -d "" "http://${ADDRESS}:8060/keypress/Back"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/Back"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		u|up|^)
+			curl -d "" "http://${ADDRESS}:8060/keypress/Up"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/Up"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		d|down|v)
+			curl -d "" "http://${ADDRESS}:8060/keypress/Down"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/Down"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		l|left|"<")
+			curl -d "" "http://${ADDRESS}:8060/keypress/Left"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/Left"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		r|right|">")
+			curl -d "" "http://${ADDRESS}:8060/keypress/Right"
+			if (( $VERBOS == 1 )); then
+				echo 'curl -d "" "http://${ADDRESS}:8060/launch/keypress/Right"'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		s.5)
+			if (( $VERBOS == 1 )); then
+				echo 'wait 0.5 seconds'
+			fi
+	                sleep .5
+	                shift
+	                ;;
+		s1)
+			if (( $VERBOS == 1 )); then
+				echo 'wait 1 second'
+			fi
+	                sleep 1
+	                shift
+	                ;;
+		s2)
+			if (( $VERBOS == 1 )); then
+				echo 'wait 2 seconds'
+			fi
+	                sleep 2
+	                shift
+	                ;;
+		s5)
+			if (( $VERBOS == 1 )); then
+				echo 'wait 5 seconds'
+			fi
+	                sleep 5
+	                shift
+	                ;;
+	esac
+done
