@@ -8,7 +8,7 @@ This bash script leverages cURL and roku's External Control Protocol ([ECP](http
 
 ```
    Send simple remote commands to Roku devices using curl to interact with Rokus ECP (External Control Protocal) server on port 8060.
-   Usage: ${script} -a [ADDRESS] [ [-h] [-v] [-c [ARGS]] [-l [ARGS]] ]"
+   Usage: rokuc -a [ADDRESS] [ [-h] [-v] [-c [ARGS]] [-l [ARGS]] ]"
    -a | --address                  IP address of roku device ** REQUIRED **
    -c | --command                  Send remote commands to device
    -l | --launch                   Launch Channel/Application on device
