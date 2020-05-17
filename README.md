@@ -6,72 +6,45 @@ This bash script leverages cURL and roku's External Control Protocol ([ECP](http
 
 ## Usage :
 
-rokuc -a [ADDRESS] [ [-h] [-v] [-c [ARGS]] [-l [ARGS]] ]
+```
+   -a | --address                  IP address of roku device ** REQUIRED **
+   -c | --command                  Send remote commands to device
+   -l | --launch                   Launch Channel/Application on device
+   -v | --verbose                  Enable verbose mode
+   -h | --help                     Display this message
 
-- -h                        Show help file
+Args for [-c|--command] flag
+   play | pause | | | p            Pause and Play
+   home | #                        Go to home screen
+   select | ok | .                 Select
+   vol+ | v+ | vup | +             Turn volume up
+   vol- | v- | vdown | -           Turn volume down
+   mute | m                        Mute
+   off | power-off | shutdown | O  Power off Roku TV
+   on | power-on | startup | I     Power on Roku TV
+   back | k                        Back
+   u | up | ^                      Up arrow
+   d | down | v                    Down arrow
+   l | left | <                    Left arrow
+   r | right | >                   Right arrow
+   s.5                             Wait 0.5 seconds
+   s1                              Wait 1 second
+   s2                              Wait 2 seconds
+   s5                              Wait 5 seconds
 
-- -v                        Enable verbos
+Args for [-l|--launch] flag
+   plex      Launch Plex.tv
+   youtube   Launch YouTube 
+   netflix   Launch Netflix
+   hulu      Launch Hulu
+   tv        Launch Digital TV on Roku TVs
+   hdmi1     Launch HDMI1
+   hdmi2     Launch HDMI2
+   hdmi3     Launch HDMI3
+   hdmi4     Launch HDMI4
+   av1       Launch AV1
 
-- -a [ADDRESS]    Ip address of roku device
-
-- -c [ARGS]            Commands to Roku control
-  
-  - play, pause, |, p    Pause and play
-  
-  - home, #                  Home menu
-  
-  - select, ok, .             Select
-  
-  - vol+, v+, vup, +      Volume up
-  
-  - vol-, v-, vdown, -    Volume down
-  
-  - mute, m                  Mute
-  
-  - off, O                       Turn device off
-  
-  - on, I                         Turn device on
-  
-  - back, k                    Back
-  
-  - u, up                       Button Up
-  
-  - d, down                  Button Down
-  
-  - l, left                       Button Left
-  
-  - r, right                    Button Right
-  
-  - s.5                           Sleep 0.5sec
-  
-  - s1                            Sleep 1sec
-  
-  - s2                            Sleep 2sec
-  
-  - s5                            Sleep 5sec
-
-- -l [ARGS]             Launch Channel
-  
-  - plex
-  
-  - youtube
-  
-  - netflix
-  
-  - hulu
-  
-  - tv
-  
-  - hdmi1
-  
-  - hdmi2
-  
-  - hdmi3
-  
-  - hdmi4
-  
-  - av1
-
+```
 ### Usage Examples
 
 Launch Netflix:
