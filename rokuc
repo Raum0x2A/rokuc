@@ -31,7 +31,7 @@ function helpme()
 {
 	echo -e "rokuc   ver. ${vernum}"
 	echo "Send simple remote commands to Roku devices using curl to interact with Rokus ECP (External Control Protocal) server on port 8060."
-	echo "Usage: ${script} [[-a [ADDRESS]] [-s]] [[-h] [-v] [-c [ARGS]] [-l [ARGS]]]"	
+	echo "Usage: ${script} [[-a [ADDRESS]] [-s [IP SUBNET]]] [[-h] [-v] [-c [ARGS]] [-l [ARGS]]]"	
 	echo -e '''   -a | --address\tIP address of roku device ** REQUIRED **
    -c | --command\tSend remote commands to device.
    -l | --launch \tLaunch Channel/Application on device
@@ -70,6 +70,10 @@ Args for [-l|--launch] flag
    hdmi3  \t Launch HDMI3
    hdmi4  \t Launch HDMI4
    av1    \t Launch AV1
+
+Argument for [-s|--scan [IP SUBNET]] flag
+   Input your LAN subnet
+   i.e. 192.168.11.0, 10.0.0.0, 192.168.0.0, etc...
 '''
     echo -e "Examples:\nLaunch Netflix\n\t${script} -a 192.168.11.142 -l netflix\n"
     echo -e "Pause Roku \n\t${script} -a 192.168.11.142 -c pause\n"
