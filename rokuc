@@ -4,18 +4,41 @@ if ! hash curl 2>/dev/null; then
     echo "curl is not installed"
     exit
 fi
+if ! hash nmap 2>/dev/null; then
+    devscan=0
+else
+    devscan=1
+fi
+
+# Default subnet mask
+lanCIDR=24
 
 script=`basename "$0"`
+vernum="1.1"
+
+function versionInfo()
+{
+	echo -e "rokuc (Roku CLI Remote) ${vernum}"
+	echo -e '''   Copyright (C) 2020 Bradley Richins II
+   License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>
+   This is free software: you are free to change and redistribute it.
+   There is NO WARRANTY, to the extent permitted by law.
+'''
+   exit
+}
 
 function helpme()
 {
+	echo -e "rokuc   ver. ${vernum}"
 	echo "Send simple remote commands to Roku devices using curl to interact with Rokus ECP (External Control Protocal) server on port 8060."
-	echo "Usage: ${script} -a [ADDRESS] [ [-h] [-v] [-c [ARGS]] [-l [ARGS]] ]"	
+	echo "Usage: ${script} [[-a [ADDRESS]] [-s]] [[-h] [-v] [-c [ARGS]] [-l [ARGS]] ]"	
 	echo -e '''   -a | --address\tIP address of roku device ** REQUIRED **
-   -c | --command\tSend remote commands to device
+   -c | --command\tSend remote commands to device.
    -l | --launch \tLaunch Channel/Application on device
    -v | --verbose \tEnable verbose mode
-   -h | --help   \tDisplay this message
+   -h | --help   \tDisplay this message and exit
+   -i | --version\tDisplay version info and exit
+   -s | --scan	 \tScan LAN for active Roku devices
 
 Args for [-c|--command] flag
    play | pause | | | p          \t Pause and Play
@@ -48,12 +71,40 @@ Args for [-l|--launch] flag
    hdmi4  \t Launch HDMI4
    av1    \t Launch AV1
 '''
-echo -e "Examples:\nLaunch Netflix\n\t./${script} -a 192.168.11.142 -l netflix\n"
-echo -e "Pause Roku \n\t./${script} -a 192.168.11.142 -c pause\n"
-echo -e "Go Home & turn down volume\n\t./${script} -a 192.168.11.142 -c \"# v- v-\"\n"
-echo -e "Launch plex, wait 5 seconds, move right, select \n\t./${script} -a 192.168.11.142 -l plex -c \"s5 > .\""
-echo -e "ECP documentation:\n\thttps://developer.roku.com/docs/developer-program/debugging/external-control-api.md"
+    echo -e "Examples:\nLaunch Netflix\n\t${script} -a 192.168.11.142 -l netflix\n"
+    echo -e "Pause Roku \n\t${script} -a 192.168.11.142 -c pause\n"
+    echo -e "Go Home & turn down volume\n\t${script} -a 192.168.11.142 -c \"# v- v-\"\n"
+    echo -e "Launch plex, wait 5 seconds, move right, select \n\t${script} -a 192.168.11.142 -l plex -c \"s5 > .\""
+    echo -e "ECP documentation:\n\thttps://developer.roku.com/docs/developer-program/debugging/external-control-api.md"
+    echo -e "\nCheck for updates at https://gitlab.com/bradley.richins/rokuc"
 
+    exit
+}
+
+# IP address validation
+function valid_ip()
+{
+    local  ip=$1
+    local  stat=1
+
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        OIFS=$IFS
+        IFS='.'
+        ip=($ip)
+        IFS=$OIFS
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        stat=$?
+    fi
+    return $stat
+}
+
+function scan4dev()
+{
+    if valid_ip $1; then
+        nmap -p8060 -Pn $1/$lanCIDR -oG - | grep 8060/open
+    else
+        echo -e "Invalid address: $1"
+    fi
 }
 
 VERBOS=0
@@ -62,6 +113,26 @@ while [[ $# -gt 0 ]]
 do
 	key="$1"
 	case $key in
+	        -s|--scan)
+			SUBNET="$2"
+			if [[ $devscan == 1 ]]; then
+			    scan4dev $SUBNET
+			    exit
+			else
+			    echo "Scaning requires nmap, please install nmap to continue"
+			    exit
+			fi
+			shift
+			shift
+			;;
+		-h|--help)
+			helpme
+			shift
+			;;
+		-i|--version)
+			versionInfo
+			shift
+			;;
 		-a|--address)
 			ADDRESS="$2"
 			shift
@@ -82,10 +153,7 @@ do
 			shift
 			shift
 			;;
-		-h|--help)
-			helpme
-			shift
-			;;
+
 		*)
 			POSITIONAL+=($1)
 			shift
@@ -100,23 +168,6 @@ if [[ $VERBOS == 1 ]]; then
         echo -e "   --verbos       \t${VERBOS}"
 	echo -e "   positional args\t${POSITIONAL[@]}"
 fi
-
-# IP address validation
-function valid_ip()
-{
-    local  ip=$1
-    local  stat=1
-
-    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-        OIFS=$IFS
-        IFS='.'
-        ip=($ip)
-        IFS=$OIFS
-        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
-        stat=$?
-    fi
-    return $stat
-}
 
 # kill script if args are invalid
 if [[ -n $1 ]]; then
