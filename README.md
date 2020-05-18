@@ -15,8 +15,8 @@ Usage: rokuc [[-a [ADDRESS]] [-s]] [[-h] [-v] [-c [ARGS]] [-l [ARGS]] ]
    -l | --launch                   Launch Channel/Application on device
    -v | --verbose                  Enable verbose mode
    -h | --help                     Display this message
-   -i | --version	Display version info and exit
-   -s | --scan	 	Scan LAN for active Roku devices
+   -i | --version		   Display version info and exit
+   -s | --scan	 		   Scan LAN for active Roku devices
 
 
 Args for [-c|--command] flag
