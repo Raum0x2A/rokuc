@@ -31,7 +31,7 @@ function helpme()
 {
 	echo -e "rokuc   ver. ${vernum}"
 	echo "Send simple remote commands to Roku devices using curl to interact with Rokus ECP (External Control Protocal) server on port 8060."
-	echo "Usage: ${script} [[-a [ADDRESS]] [-s]] [[-h] [-v] [-c [ARGS]] [-l [ARGS]] ]"	
+	echo "Usage: ${script} [[-a [ADDRESS]] [-s]] [[-h] [-v] [-c [ARGS]] [-l [ARGS]]]"	
 	echo -e '''   -a | --address\tIP address of roku device ** REQUIRED **
    -c | --command\tSend remote commands to device.
    -l | --launch \tLaunch Channel/Application on device
